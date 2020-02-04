@@ -128,10 +128,11 @@ func (w *CeleryWorker) RunTask(message *TaskMessage) (*ResultMessage, error) {
 	// convert to task interface
 	taskInterface, ok := task.(CeleryTask)
 	if ok {
-		if err := taskInterface.ParseKwargs(message.Kwargs); err != nil {
+		newTask := reflect.New(reflect.TypeOf(taskInterface).Elem()).Interface().(CeleryTask)
+		if err := newTask.ParseKwargs(message.Kwargs); err != nil {
 			return nil, err
 		}
-		val, err := taskInterface.RunTask()
+		val, err := newTask.RunTask()
 		if err != nil {
 			return nil, err
 		}
